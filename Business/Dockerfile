@@ -13,7 +13,7 @@ COPY ["Business/Business.csproj", "Business/"]
 RUN dotnet restore "./Business/Business.csproj"
 COPY . .
 WORKDIR "/src/Business"
-RUN dotnet build "./Business.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "./Business.csproj" -c $BUILD_CONFIGURATION -o /app/build        
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
