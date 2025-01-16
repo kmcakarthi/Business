@@ -21,7 +21,7 @@ builder.Services.AddDbContext<BusinessContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Configuration.AddJsonFile(@"C:\inetpub\wwwroot\businessapp\appsettings.json", optional: false, reloadOnChange: true);
+//builder.Configuration.AddJsonFile(@"C:\inetpub\wwwroot\businessapp\appsettings.json", optional: false, reloadOnChange: true);
 
 var app = builder.Build();
 
