@@ -6,6 +6,8 @@
         public string Name { get; set; }
         public string? Description { get; set; }
         public double? Distancekm { get; set; }
+        public double? Latitude { get; set; }
+        public double? longitude { get; set; }
         public string? VisitingCard { get; set; }
     }
 }
