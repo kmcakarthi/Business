@@ -44,13 +44,15 @@ namespace Business.Controllers
                 return BadRequest(new { message = "Invalid data. Please check the input." }); // HTTP 400 Bad Request
             }
 
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(customer.Cus_Password);
+
             try
             {
                 // Add new customer
                 var customerObj = new Customer
                 {
                     Cus_EmailId = customer.Cus_EmailId,
-                    Cus_Password = customer.Cus_Password,
+                    Cus_Password = hashedPassword,
                     Cus_Location = customer.Cus_Location
                 };
                 _context.Customers.Add(customerObj);
