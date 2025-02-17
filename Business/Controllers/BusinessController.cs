@@ -24,13 +24,15 @@ namespace Business.Controllers
         public ILogger<BusinessController> _logger;
         private readonly IConfiguration _configuration;
         private readonly string _apiKey;
+        private IWebHostEnvironment _env;
 
         private readonly string _uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-        public BusinessController(ILogger<BusinessController> logger, BusinessContext context, HttpClient httpClient, IConfiguration configuration)
+        public BusinessController(ILogger<BusinessController> logger, BusinessContext context, HttpClient httpClient, IConfiguration configuration,IWebHostEnvironment env)
         {
             _context = context;
             _logger = logger;
             _apiKey = configuration["GoogleMaps:ApiKey"]; // API key stored in configuration
+            _env=env;
         }        
 
         [HttpGet("{imageName}")]
@@ -53,10 +55,39 @@ namespace Business.Controllers
             {
                 if (businesDto.VisitingCard != null)
                 {
-                    var filePath = Path.Combine("C:\\Narayana\\moh\\Business+Backend\\Business+Backend\\Business\\Business\\uploads", businesDto.VisitingCard.FileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    //var filePath = Path.Combine("C:\\Narayana\\moh\\Business+Backend\\Business+Backend\\Business\\Business\\uploads", businesDto.VisitingCard.FileName);
+
+                    //var filePath = Path.Combine(_env.WebRootPath, "uploads");
+                    //using (var stream = new FileStream(filePath, FileMode.Create))
+                    //{
+                    //    await businesDto.VisitingCard.CopyToAsync(stream);
+                    //}
+
+
+
+                    string? filePath = null;
+
+                    if (businesDto.VisitingCard != null)
                     {
-                        await businesDto.VisitingCard.CopyToAsync(stream);
+                        // Ensure the uploads folder exists
+                        var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        // Generate a unique file name to prevent conflicts
+                        string uniqueFileName = $"{Guid.NewGuid()}_{businesDto.VisitingCard.FileName}";
+                        filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        // Save the file
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await businesDto.VisitingCard.CopyToAsync(stream);
+                        }
+
+                        // Convert to a relative path (for storing in the database)
+                        filePath = Path.Combine("uploads", uniqueFileName);
                     }
 
                     bool isRegistered = await _context.Businesses.AnyAsync(u => u.EmailId == businesDto.EmailId && u.Name == businesDto.Name);
@@ -121,7 +152,8 @@ namespace Business.Controllers
                         System.IO.File.Delete(existingBusiness.VisitingCard);
                     }
 
-                    var filePath = Path.Combine("C:\\Narayana\\moh\\Business+Backend\\Business+Backend\\Business\\Business\\uploads", businesDto.VisitingCard.FileName);
+                    var filePath = Path.Combine(_env.WebRootPath, "uploads");
+                    //var filePath = Path.Combine("C:\\Narayana\\moh\\Business+Backend\\Business+Backend\\Business\\Business\\uploads", businesDto.VisitingCard.FileName);
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await businesDto.VisitingCard.CopyToAsync(stream);
