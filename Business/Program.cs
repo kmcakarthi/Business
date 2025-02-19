@@ -9,7 +9,7 @@ builder.Services.AddHttpClient<GeocodingService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-            builder => builder.WithOrigins("https://sasmita2622606.github.io")
+            builder => builder.WithOrigins("https://sasmita2622606.github.io")   //deployed url https://sasmita2622606.github.io, http://localhost:4200
                               .AllowAnyHeader()
                               .AllowAnyMethod());
 });
