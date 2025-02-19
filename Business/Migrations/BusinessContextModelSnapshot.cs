@@ -124,6 +124,12 @@ namespace Business.Migrations
                     b.Property<string>("Cus_Password")
                         .HasColumnType("text");
 
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
                     b.HasKey("Cus_Id");
 
                     b.ToTable("Customers");

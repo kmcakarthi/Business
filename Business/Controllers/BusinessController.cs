@@ -190,6 +190,13 @@ namespace Business.Controllers
             }
         }
 
+        [HttpGet("check-email")]
+        public async Task<ActionResult<bool>> CheckEmailExistsBusiness(string email)
+        {
+            bool exists = await _context.Businesses.AnyAsync(u => u.EmailId == email);
+            return Ok(exists);
+        }
+
         [HttpGet("GetCategories")]
         public async Task<IActionResult> GetCategories()
         {
