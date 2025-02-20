@@ -48,7 +48,7 @@ namespace Banking_Application.Controllers
                 if (userBusiness != null)
                 {
                     // Verify the password
-                    if (!BCrypt.Net.BCrypt.Verify(request.Password.Trim(), userBusiness.Password = BCrypt.Net.BCrypt.HashPassword(request.Password)))
+                    if (!BCrypt.Net.BCrypt.Verify(request.Password.Trim(), userBusiness.Password))
                     {
                         return Unauthorized("Invalid username or password.");
                     }
