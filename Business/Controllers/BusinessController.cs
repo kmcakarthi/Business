@@ -53,70 +53,56 @@ namespace Business.Controllers
         {
             try
             {
+                string? filePath = null;
+
                 if (businesDto.VisitingCard != null)
                 {
-                    //var filePath = Path.Combine("C:\\Narayana\\moh\\Business+Backend\\Business+Backend\\Business\\Business\\uploads", businesDto.VisitingCard.FileName);
-
-                    //var filePath = Path.Combine(_env.WebRootPath, "uploads");
-                    //using (var stream = new FileStream(filePath, FileMode.Create))
-                    //{
-                    //    await businesDto.VisitingCard.CopyToAsync(stream);
-                    //}
-
-
-
-                    string? filePath = null;
-
-                    if (businesDto.VisitingCard != null)
+                    // Ensure the uploads folder exists
+                    var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
+                    if (!Directory.Exists(uploadsFolder))
                     {
-                        // Ensure the uploads folder exists
-                        var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
-                        if (!Directory.Exists(uploadsFolder))
-                        {
-                            Directory.CreateDirectory(uploadsFolder);
-                        }
-
-                        // Generate a unique file name to prevent conflicts
-                        string uniqueFileName = $"{Guid.NewGuid()}_{businesDto.VisitingCard.FileName}";
-                        filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        // Save the file
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await businesDto.VisitingCard.CopyToAsync(stream);
-                        }
-
-                        // Convert to a relative path (for storing in the database)
-                        filePath = Path.Combine("uploads", uniqueFileName);
+                        Directory.CreateDirectory(uploadsFolder);
                     }
 
-                    bool isRegistered = await _context.Businesses.AnyAsync(u => u.EmailId == businesDto.EmailId && u.Name == businesDto.Name);
-                    if (isRegistered)
+                    // Generate a unique file name to prevent conflicts
+                    string uniqueFileName = $"{Guid.NewGuid()}_{businesDto.VisitingCard.FileName}";
+                    filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    // Save the file
+                    using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        return Ok(new { message = "Email is already registered." });
+                        await businesDto.VisitingCard.CopyToAsync(stream);
                     }
 
-                    string hashedPassword = BCrypt.Net.BCrypt.HashPassword(businesDto.Password);
-
-                    var business = new Busines
-                    {
-                        Name = businesDto.Name,
-                        EmailId = businesDto.EmailId,
-                        Password = hashedPassword,
-                        Description = businesDto.Description,
-                        Location = businesDto.Location,
-                        Latitude = businesDto.Latitude,
-                        Longitude = businesDto.Longitude,
-                        VisitingCard = filePath,
-                        CategoryID = businesDto.CategoryID,
-                        SubCategoryID = businesDto.SubCategoryID
-                    };
-                    _context.Businesses.Add(business);
-                    int regStatus = await _context.SaveChangesAsync();
-                    return Ok(true);
+                    // Convert to a relative path (for storing in the database)
+                    filePath = Path.Combine("uploads", uniqueFileName);
                 }
 
-                return BadRequest(false);
+                bool isRegistered = await _context.Businesses.AnyAsync(u => u.EmailId == businesDto.EmailId && u.Name == businesDto.Name);
+                if (isRegistered)
+                {
+                    return Ok(new { message = "Email is already registered." });
+                }
+
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(businesDto.Password);
+
+                var business = new Busines
+                {
+                    Name = businesDto.Name,
+                    EmailId = businesDto.EmailId,
+                    Password = hashedPassword,
+                    Description = businesDto.Description,
+                    Location = businesDto.Location,
+                    Latitude = businesDto.Latitude,
+                    Longitude = businesDto.Longitude,
+                    VisitingCard = filePath,
+                    CategoryID = businesDto.CategoryID,
+                    SubCategoryID = businesDto.SubCategoryID
+                };
+                _context.Businesses.Add(business);
+                int regStatus = await _context.SaveChangesAsync();
+                return Ok(true);
+               
             }
             catch (Exception ex)
             {
