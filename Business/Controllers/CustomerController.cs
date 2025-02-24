@@ -31,13 +31,6 @@ namespace Business.Controllers
         [HttpPost]
         public async Task<ActionResult<bool>> Registercustomer(Customer customer)
         {
-            // Check if the email is already registered
-            bool isRegistered = await _context.Customers.AnyAsync(u => u.Cus_EmailId == customer.Cus_EmailId);
-            if (isRegistered)
-            {
-                return Conflict(new { message = "Email is already registered." }); // HTTP 409 Conflict
-            }
-
             // Validate customer data
             if (customer == null || string.IsNullOrEmpty(customer.Cus_EmailId) || string.IsNullOrEmpty(customer.Cus_Password))
             {
@@ -53,7 +46,9 @@ namespace Business.Controllers
                 {
                     Cus_EmailId = customer.Cus_EmailId,
                     Cus_Password = hashedPassword,
-                    Cus_Location = customer.Cus_Location
+                    Cus_Location = customer.Cus_Location,
+                    Longitude = customer.Longitude,
+                    Latitude = customer.Latitude
                 };
                 _context.Customers.Add(customerObj);
                 await _context.SaveChangesAsync();
@@ -65,6 +60,20 @@ namespace Business.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     new { message = "An error occurred while processing your request.", details = ex.Message }); // HTTP 500 Internal Server Error
             }
+        }
+
+        [HttpGet("getcusdetailsbyid")]
+        public async Task<ActionResult> getCustomerDetailByID(int cusId)
+        {
+            var customerData = await _context.Customers.Where(u => u.Cus_Id == cusId).ToListAsync();
+            return Ok(customerData);
+        }
+
+        [HttpGet("check-email")]
+        public async Task<ActionResult<bool>> CheckEmailExists(string email)
+        {
+            bool exists = await _context.Customers.AnyAsync(u => u.Cus_EmailId == email);
+            return Ok(exists);
         }
 
         [HttpPost("login")]

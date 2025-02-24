@@ -10,7 +10,5 @@
         public double? longitude { get; set; }
         public string? VisitingCard { get; set; }
         public string? Location { get; set; }
-
-
     }
 }

@@ -43,13 +43,12 @@ namespace Banking_Application.Controllers
                     return BadRequest("Username or password cannot be empty.");
 
                 // Try to authenticate as Business
-                var userBusiness = _context.Businesses
-                    .FirstOrDefault(u => u.EmailId == request.Username);
+                var userBusiness = _context.Businesses.Where(u => u.EmailId == request.Username).FirstOrDefault();
 
                 if (userBusiness != null)
                 {
                     // Verify the password
-                    if (!BCrypt.Net.BCrypt.Verify(request.Password, userBusiness.Password))
+                    if (!BCrypt.Net.BCrypt.Verify(request.Password.Trim(), userBusiness.Password))
                     {
                         return Unauthorized("Invalid username or password.");
                     }
@@ -60,8 +59,7 @@ namespace Banking_Application.Controllers
                 }
 
                 // Try to authenticate as Customer
-                var userCustomer = _context.Customers
-                    .FirstOrDefault(u => u.Cus_EmailId == request.Username);
+                var userCustomer = _context.Customers.Where(x => x.Cus_EmailId == request.Username).FirstOrDefault();
 
                 if (userCustomer != null)
                 {

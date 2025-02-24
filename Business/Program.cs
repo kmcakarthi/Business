@@ -9,7 +9,7 @@ builder.Services.AddHttpClient<GeocodingService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-            builder => builder.WithOrigins("http://localhost:4200")
+            builder => builder.WithOrigins("https://sasmita2622606.github.io")   //deployed url https://sasmita2622606.github.io, http://localhost:4200
                               .AllowAnyHeader()
                               .AllowAnyMethod());
 });
@@ -30,9 +30,7 @@ var app = builder.Build();
 // Serve static files from the 'uploads' directory
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(app.Environment.ContentRootPath, "uploads")),
-    RequestPath = "/uploads" // Public path to access files
+   
 });
 
 // Configure the HTTP request pipeline.

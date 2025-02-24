@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Business.Migrations
 {
     [DbContext(typeof(BusinessContext))]
-    [Migration("20250125010733_init")]
-    partial class init
+    [Migration("20250219063232_init-3")]
+    partial class init3
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -125,6 +125,12 @@ namespace Business.Migrations
 
                     b.Property<string>("Cus_Password")
                         .HasColumnType("text");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
 
                     b.HasKey("Cus_Id");
 
