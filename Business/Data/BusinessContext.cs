@@ -14,5 +14,6 @@ namespace Business.Data
         public DbSet<Customer> Customers { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<LoginRequest> loginRequests { get; set; }
+        public DbSet<BusinessRatings> BusinessRatings { get; set; }
     }
 }

@@ -19,5 +19,6 @@ namespace Business.Models
 
         // Navigation property
         public SubCategory SubCategory { get; set; } = null!;
+        public ICollection<BusinessRatings> BusinessRatings { get; set; }
     }
 }
