@@ -86,7 +86,9 @@ namespace Banking_Application.Controllers
         {
             var claims = new[] {
                 new Claim(ClaimTypes.Email, business.EmailId),
-                new Claim("BusinessID", business.BusinessID.ToString())
+                new Claim("BusinessID", business.BusinessID.ToString()),
+                new Claim("EmailId", business.EmailId)
+
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
