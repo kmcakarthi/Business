@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Registration.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -48,7 +47,8 @@ namespace Business.Controllers
                     Cus_Password = hashedPassword,
                     Cus_Location = customer.Cus_Location,
                     Longitude = customer.Longitude,
-                    Latitude = customer.Latitude
+                    Latitude = customer.Latitude,
+                    RoleID = 4
                 };
                 _context.Customers.Add(customerObj);
                 await _context.SaveChangesAsync();

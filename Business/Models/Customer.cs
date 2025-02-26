@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Business.Models
 {
@@ -11,5 +12,10 @@ namespace Business.Models
         public string? Cus_Location { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+        // Foreign key property
+        public int RoleID { get; set; }
+        // Navigation property
+        [ForeignKey("RoleID")]
+        public Role Role { get; set; } = null!;
     }
 }

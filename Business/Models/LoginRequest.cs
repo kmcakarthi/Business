@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Registration.Models
+namespace Business.Models
 {
     public class LoginRequest
     {

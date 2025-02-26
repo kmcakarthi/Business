@@ -5,9 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Win32;
 using Microsoft.EntityFrameworkCore;
-using Banking_Application.Models;
 using Microsoft.IdentityModel.Tokens;
-using Registration.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -97,7 +95,8 @@ namespace Business.Controllers
                     Longitude = businesDto.Longitude,
                     VisitingCard = filePath,
                     CategoryID = businesDto.CategoryID,
-                    SubCategoryID = businesDto.SubCategoryID
+                    SubCategoryID = businesDto.SubCategoryID,
+                    RoleID = 3 // Business role
                 };
                 _context.Businesses.Add(business);
                 int regStatus = await _context.SaveChangesAsync();
@@ -226,29 +225,79 @@ namespace Business.Controllers
             }            
         }
 
+        //[HttpGet("search")]
+        //public async Task<IActionResult> SearchBusinesses(string category, string subcategory)
+        //{
+        //    try
+        //    {                
+        //        var businesses = await _context.Businesses
+        //        .Include(b => b.SubCategory)
+        //        .ThenInclude(sc => sc.Category)
+        //        .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory)
+        //        .Select(b => new BusinessDataShow
+        //        {
+        //            BusinessID = b.BusinessID,
+        //            Name = b.Name,
+        //            Description = b.Description,
+        //            Distancekm = b.Latitude + b.Longitude,
+        //            longitude = b.Longitude,
+        //            Latitude = b.Latitude,
+        //            VisitingCard = b.VisitingCard,
+        //            Location = b.Location
+        //        })
+        //        .ToListAsync();
+        //        return Ok(businesses);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
+        //
         [HttpGet("search")]
-        public async Task<IActionResult> SearchBusinesses(string category, string subcategory)
+        public async Task<IActionResult> SearchBusinesses(string category, string subcategory, int pageNumber = 1, int pageSize = 2)
         {
             try
             {
-                
-                var businesses = await _context.Businesses
-                .Include(b => b.SubCategory)
-                .ThenInclude(sc => sc.Category)
-                .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory)
-                .Select(b => new BusinessDataShow
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+
+                var query = _context.Businesses
+                    .Include(b => b.SubCategory)
+                    .ThenInclude(sc => sc.Category)
+                    .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory);
+
+                // Get total records count
+                var totalRecords = await query.CountAsync();
+
+                // Apply pagination
+                var businesses = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(b => new BusinessDataShow
+                    {
+                        BusinessID = b.BusinessID,
+                        Name = b.Name,
+                        Description = b.Description,
+                        Distancekm = b.Latitude + b.Longitude,
+                        longitude = b.Longitude,
+                        Latitude = b.Latitude,
+                        VisitingCard = b.VisitingCard,
+                        Location = b.Location
+                    })
+                    .ToListAsync();
+
+                // Pagination metadata
+                var pagination = new
                 {
-                    BusinessID = b.BusinessID,
-                    Name = b.Name,
-                    Description = b.Description,
-                    Distancekm = b.Latitude + b.Longitude,
-                    longitude = b.Longitude,
-                    Latitude = b.Latitude,
-                    VisitingCard = b.VisitingCard,
-                    Location = b.Location
-                })
-                .ToListAsync();
-                return Ok(businesses);
+                    TotalRecords = totalRecords,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
+                    Data = businesses
+                };
+
+                return Ok(pagination);
             }
             catch (Exception ex)
             {

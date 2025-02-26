@@ -1,7 +1,5 @@
-﻿using Banking_Application.Models;
-using Business.Models;
+﻿using Business.Models;
 using Microsoft.EntityFrameworkCore;
-using Registration.Models;
 
 namespace Business.Data
 {
@@ -12,7 +10,8 @@ namespace Business.Data
         public DbSet<SubCategory> SubCategories { get; set; }
         public DbSet<Busines> Businesses { get; set; }
         public DbSet<Customer> Customers { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<LoginRequest> loginRequests { get; set; }
+        public DbSet<AdminLoginRequest> AdminLoginRequests { get; set; }
+        public DbSet<Role> Roles { get; set; }
     }
 }
