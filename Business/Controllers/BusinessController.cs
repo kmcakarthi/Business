@@ -245,7 +245,8 @@ namespace Business.Controllers
                     Latitude = b.Latitude,
                     VisitingCard = b.VisitingCard,
                     Location = b.Location,
-                    AverageRating = b.BusinessRatings.Any() ? b.BusinessRatings.Average(br => br.Rating) : 0
+                    AverageRating = b.BusinessRatings.Any() ? b.BusinessRatings.Average(br => br.Rating) : 0,
+                    RoleID = b.RoleID
                 })
                 .ToListAsync();
                 return Ok(businesses);
@@ -324,7 +325,8 @@ namespace Business.Controllers
                     Latitude = b.Latitude,
                     Longitude = b.Longitude,
                     CategoryID = b.CategoryID,
-                    SubCategoryID = b.SubCategoryID                    
+                    SubCategoryID = b.SubCategoryID,
+                    RoleID = b.RoleID
                 }).ToListAsync();
 
                 return Ok(businesses);
