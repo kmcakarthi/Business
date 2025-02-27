@@ -40,7 +40,7 @@ namespace Banking_Application.Controllers
                 // Try to authenticate as Business
                 var userBusiness = _context.Businesses.Where(u => u.EmailId == request.Username).FirstOrDefault();
 
-                if (userBusiness != null)
+                if (userBusiness != null && userBusiness.RoleID == 3)
                 {
                     // Verify the password
                     if (!BCrypt.Net.BCrypt.Verify(request.Password.Trim(), userBusiness.Password))
@@ -56,7 +56,7 @@ namespace Banking_Application.Controllers
                 // Try to authenticate as Customer
                 var userCustomer = _context.Customers.Where(x => x.Cus_EmailId == request.Username).FirstOrDefault();
 
-                if (userCustomer != null)
+                if (userCustomer != null && userBusiness.RoleID == 4)
                 {
                     // Verify the password
                     if (!BCrypt.Net.BCrypt.Verify(request.Password, userCustomer.Cus_Password))
@@ -68,13 +68,30 @@ namespace Banking_Application.Controllers
                     token = GenerateCustomerToken(userCustomer);
                     return Ok(new { token });
                 }
+                var admin = _context.AdminLoginRequests.Where(x => x.EmailId == request.Username).FirstOrDefault();
+
+                if (admin != null && admin.RoleId == 1)
+                {
+                    // Verify the password
+                    string HashedPassword = BCrypt.Net.BCrypt.HashPassword(admin.AdminPassword);
+
+                    if (!BCrypt.Net.BCrypt.Verify(request.Password, HashedPassword))
+                    {
+                        return Unauthorized("Invalid username or password.");
+                    }
+
+                    // Generate token for Admin
+                    token = GenerateTokenforAdmin(admin);
+                    return Ok(new { token });
+
+                }
 
                 return Unauthorized("Invalid username or password.");
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
-            }            
+            }
         }
 
         private string GenerateBusinessToken(Busines business)
@@ -179,7 +196,7 @@ namespace Banking_Application.Controllers
             string body = $"Click the following link to reset your password: <a href='{resetLink}'>Reset Password</a>";
 
             // Implement your email sending logic here
-            await _emailService.SendEmailAsync(email, subject, body);
+            await _emailService.SendEmailForForgotPasswordAsync(email, subject, body);
         }
 
         [HttpPost("reset-password")]
@@ -239,6 +256,25 @@ namespace Banking_Application.Controllers
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+
+        private string GenerateTokenforAdmin(AdminLoginRequest adminLogin)
+        {
+            var claims = new[] {
+            new Claim(ClaimTypes.Email, adminLogin.EmailId)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(5),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

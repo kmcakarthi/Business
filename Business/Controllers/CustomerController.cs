@@ -28,26 +28,26 @@ namespace Business.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<bool>> Registercustomer(Customer customer)
+        public async Task<ActionResult<bool>> Registercustomer(CustomerDto customerDto)
         {
             // Validate customer data
-            if (customer == null || string.IsNullOrEmpty(customer.Cus_EmailId) || string.IsNullOrEmpty(customer.Cus_Password))
+            if (customerDto == null || string.IsNullOrEmpty(customerDto.Cus_EmailId) || string.IsNullOrEmpty(customerDto.Cus_Password))
             {
                 return BadRequest(new { message = "Invalid data. Please check the input." }); // HTTP 400 Bad Request
             }
 
-            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(customer.Cus_Password);
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(customerDto.Cus_Password);
 
             try
             {
                 // Add new customer
                 var customerObj = new Customer
                 {
-                    Cus_EmailId = customer.Cus_EmailId,
+                    Cus_EmailId = customerDto.Cus_EmailId,
                     Cus_Password = hashedPassword,
-                    Cus_Location = customer.Cus_Location,
-                    Longitude = customer.Longitude,
-                    Latitude = customer.Latitude,
+                    Cus_Location = customerDto.Cus_Location,
+                    Longitude = customerDto.Longitude,
+                    Latitude = customerDto.Latitude,
                     RoleID = 4
                 };
                 _context.Customers.Add(customerObj);

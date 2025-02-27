@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Business.Migrations
 {
-    public partial class init4 : Migration
+    public partial class init1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -142,6 +143,29 @@ namespace Business.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "BusinessRatings",
+                columns: table => new
+                {
+                    BusinessRatingID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    BusinessID = table.Column<int>(type: "integer", nullable: false),
+                    Rating = table.Column<decimal>(type: "numeric(3,2)", nullable: false),
+                    RatedBy = table.Column<string>(type: "text", nullable: false),
+                    Comment = table.Column<string>(type: "text", nullable: true),
+                    DateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BusinessRatings", x => x.BusinessRatingID);
+                    table.ForeignKey(
+                        name: "FK_BusinessRatings_Businesses_BusinessID",
+                        column: x => x.BusinessID,
+                        principalTable: "Businesses",
+                        principalColumn: "BusinessID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Businesses_RoleID",
                 table: "Businesses",
@@ -151,6 +175,11 @@ namespace Business.Migrations
                 name: "IX_Businesses_SubCategoryID",
                 table: "Businesses",
                 column: "SubCategoryID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BusinessRatings_BusinessID",
+                table: "BusinessRatings",
+                column: "BusinessID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Customers_RoleID",
@@ -169,7 +198,7 @@ namespace Business.Migrations
                 name: "AdminLoginRequests");
 
             migrationBuilder.DropTable(
-                name: "Businesses");
+                name: "BusinessRatings");
 
             migrationBuilder.DropTable(
                 name: "Customers");
@@ -178,10 +207,13 @@ namespace Business.Migrations
                 name: "loginRequests");
 
             migrationBuilder.DropTable(
-                name: "SubCategories");
+                name: "Businesses");
 
             migrationBuilder.DropTable(
                 name: "Roles");
+
+            migrationBuilder.DropTable(
+                name: "SubCategories");
 
             migrationBuilder.DropTable(
                 name: "Categories");

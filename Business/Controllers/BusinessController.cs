@@ -225,85 +225,87 @@ namespace Business.Controllers
             }            
         }
 
-        //[HttpGet("search")]
-        //public async Task<IActionResult> SearchBusinesses(string category, string subcategory)
-        //{
-        //    try
-        //    {                
-        //        var businesses = await _context.Businesses
-        //        .Include(b => b.SubCategory)
-        //        .ThenInclude(sc => sc.Category)
-        //        .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory)
-        //        .Select(b => new BusinessDataShow
-        //        {
-        //            BusinessID = b.BusinessID,
-        //            Name = b.Name,
-        //            Description = b.Description,
-        //            Distancekm = b.Latitude + b.Longitude,
-        //            longitude = b.Longitude,
-        //            Latitude = b.Latitude,
-        //            VisitingCard = b.VisitingCard,
-        //            Location = b.Location
-        //        })
-        //        .ToListAsync();
-        //        return Ok(businesses);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, $"Internal server error: {ex.Message}");
-        //    }
-        //}
-        //
         [HttpGet("search")]
-        public async Task<IActionResult> SearchBusinesses(string category, string subcategory, int pageNumber = 1, int pageSize = 2)
+        public async Task<IActionResult> SearchBusinesses(string category, string subcategory)
         {
             try
             {
-                if (pageNumber < 1) pageNumber = 1;
-                if (pageSize < 1) pageSize = 10;
-
-                var query = _context.Businesses
-                    .Include(b => b.SubCategory)
-                    .ThenInclude(sc => sc.Category)
-                    .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory);
-
-                // Get total records count
-                var totalRecords = await query.CountAsync();
-
-                // Apply pagination
-                var businesses = await query
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .Select(b => new BusinessDataShow
-                    {
-                        BusinessID = b.BusinessID,
-                        Name = b.Name,
-                        Description = b.Description,
-                        Distancekm = b.Latitude + b.Longitude,
-                        longitude = b.Longitude,
-                        Latitude = b.Latitude,
-                        VisitingCard = b.VisitingCard,
-                        Location = b.Location
-                    })
-                    .ToListAsync();
-
-                // Pagination metadata
-                var pagination = new
+                var businesses = await _context.Businesses
+                .Include(b => b.SubCategory)
+                .ThenInclude(sc => sc.Category)
+                .Include(b => b.BusinessRatings)
+                .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory)
+                .Select(b => new BusinessDataShow
                 {
-                    TotalRecords = totalRecords,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
-                    Data = businesses
-                };
-
-                return Ok(pagination);
+                    BusinessID = b.BusinessID,
+                    Name = b.Name,
+                    Description = b.Description,
+                    Distancekm = b.Latitude + b.Longitude,
+                    longitude = b.Longitude,
+                    Latitude = b.Latitude,
+                    VisitingCard = b.VisitingCard,
+                    Location = b.Location,
+                    AverageRating = b.BusinessRatings.Any() ? b.BusinessRatings.Average(br => br.Rating) : 0
+                })
+                .ToListAsync();
+                return Ok(businesses);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        
+        //[HttpGet("search")]
+        //public async Task<IActionResult> SearchBusinesses(string category, string subcategory, int pageNumber = 1, int pageSize = 2)
+        //{
+        //    try
+        //    {
+        //        if (pageNumber < 1) pageNumber = 1;
+        //        if (pageSize < 1) pageSize = 10;
+
+        //        var query = _context.Businesses
+        //            .Include(b => b.SubCategory)
+        //            .ThenInclude(sc => sc.Category)
+        //            .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory);
+
+        //        // Get total records count
+        //        var totalRecords = await query.CountAsync();
+
+        //        // Apply pagination
+        //        var businesses = await query
+        //            .Skip((pageNumber - 1) * pageSize)
+        //            .Take(pageSize)
+        //            .Select(b => new BusinessDataShow
+        //            {
+        //                BusinessID = b.BusinessID,
+        //                Name = b.Name,
+        //                Description = b.Description,
+        //                Distancekm = b.Latitude + b.Longitude,
+        //                longitude = b.Longitude,
+        //                Latitude = b.Latitude,
+        //                VisitingCard = b.VisitingCard,
+        //                Location = b.Location
+        //            })
+        //            .ToListAsync();
+
+        //        // Pagination metadata
+        //        var pagination = new
+        //        {
+        //            TotalRecords = totalRecords,
+        //            PageNumber = pageNumber,
+        //            PageSize = pageSize,
+        //            TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
+        //            Data = businesses
+        //        };
+
+        //        return Ok(pagination);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
 
         [HttpGet("getbusinessdetailbyid/{id}")]
         public async Task<IActionResult> GetBusineesDetailById(int id)

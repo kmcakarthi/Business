@@ -38,5 +38,18 @@ namespace Business.Service
             }
             return password.ToString();
         }
+        public async Task<string> GetEmailSubAdmin(string email)
+        {
+            // Generate a random password
+            var password = GenerateRandomPassword(8);
+
+            // Create email body
+            var emailBody = $"<p>Hi there,</p><p>Your account has been added as sub-admin successfully.</p><p>Here are your default login credentials:</p><p><b>Password: {password}</b><p>You can login now to provide ratings and comments for the business owners and customers.</p><p>Thank You,</p><p>Business Application</p></p>";
+
+            // Send the email
+            await _emailService.SendEmailAsync(email, "Welcome as Sub-admin", emailBody);
+
+            return password;
+        }
     }
 }

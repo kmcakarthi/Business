@@ -13,5 +13,6 @@ namespace Business.Data
         public DbSet<LoginRequest> loginRequests { get; set; }
         public DbSet<AdminLoginRequest> AdminLoginRequests { get; set; }
         public DbSet<Role> Roles { get; set; }
+        public DbSet<BusinessRatings> BusinessRatings { get; set; }
     }
 }

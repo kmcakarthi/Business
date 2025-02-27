@@ -24,5 +24,6 @@ namespace Business.Models
         // Navigation property for Role
         [ForeignKey("RoleID")]
         public Role Role { get; set; } = null!;
+        public ICollection<BusinessRatings> BusinessRatings { get; set; }
     }
 }

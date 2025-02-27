@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Business.Migrations
 {
     [DbContext(typeof(BusinessContext))]
-    [Migration("20250225110433_init-4")]
-    partial class init4
+    [Migration("20250227064037_init-1")]
+    partial class init1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -98,6 +98,37 @@ namespace Business.Migrations
                     b.HasIndex("SubCategoryID");
 
                     b.ToTable("Businesses");
+                });
+
+            modelBuilder.Entity("Business.Models.BusinessRatings", b =>
+                {
+                    b.Property<int>("BusinessRatingID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BusinessRatingID"));
+
+                    b.Property<int>("BusinessID")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RatedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Rating")
+                        .HasColumnType("numeric(3,2)");
+
+                    b.HasKey("BusinessRatingID");
+
+                    b.HasIndex("BusinessID");
+
+                    b.ToTable("BusinessRatings");
                 });
 
             modelBuilder.Entity("Business.Models.Category", b =>
@@ -225,6 +256,17 @@ namespace Business.Migrations
                     b.Navigation("SubCategory");
                 });
 
+            modelBuilder.Entity("Business.Models.BusinessRatings", b =>
+                {
+                    b.HasOne("Business.Models.Busines", "Business")
+                        .WithMany("BusinessRatings")
+                        .HasForeignKey("BusinessID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
             modelBuilder.Entity("Business.Models.Customer", b =>
                 {
                     b.HasOne("Business.Models.Role", "Role")
@@ -245,6 +287,11 @@ namespace Business.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Business.Models.Busines", b =>
+                {
+                    b.Navigation("BusinessRatings");
                 });
 
             modelBuilder.Entity("Business.Models.Category", b =>
