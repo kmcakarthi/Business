@@ -27,6 +27,5 @@ namespace Business.Models
 
         [Required]
         public DateTime DateTime { get; set; } = DateTime.UtcNow; // Set default value
-
     }
 }
