@@ -231,23 +231,23 @@ namespace Business.Controllers
             try
             {
                 var businesses = await _context.Businesses
-                .Include(b => b.SubCategory)
-                .ThenInclude(sc => sc.Category)
-                .Include(b => b.BusinessRatings)
-                .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory)
-                .Select(b => new BusinessDataShow
-                {
-                    BusinessID = b.BusinessID,
-                    Name = b.Name,
-                    Description = b.Description,
-                    Distancekm = b.Latitude + b.Longitude,
-                    longitude = b.Longitude,
-                    Latitude = b.Latitude,
-                    VisitingCard = b.VisitingCard,
-                    Location = b.Location,
-                    AverageRating = b.BusinessRatings.Any() ? b.BusinessRatings.Average(br => br.Rating) : 0
-                })
-                .ToListAsync();
+                    .Include(b => b.SubCategory)
+                    .ThenInclude(sc => sc.Category)
+                    .Include(b => b.BusinessRatings) // Include BusinessRatings
+                    .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory)
+                    .Select(b => new BusinessDataShow
+                    {
+                        BusinessID = b.BusinessID,
+                        Name = b.Name,
+                        Description = b.Description,
+                        Distancekm = b.Latitude + b.Longitude,
+                        longitude = b.Longitude,
+                        Latitude = b.Latitude,
+                        VisitingCard = b.VisitingCard,
+                        Location = b.Location,
+                        AverageRating = b.BusinessRatings.Any() ? b.BusinessRatings.Average(br => br.Rating) : 0
+                    })
+                    .ToListAsync();
                 return Ok(businesses);
             }
             catch (Exception ex)

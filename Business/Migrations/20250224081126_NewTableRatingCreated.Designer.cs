@@ -12,9 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Business.Migrations
 {
     [DbContext(typeof(BusinessContext))]
-
-    [Migration("20250227064037_init-1")]
-    partial class init1
+    [Migration("20250224081126_NewTableRatingCreated")]
+    partial class NewTableRatingCreated
 
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -240,6 +239,23 @@ namespace Business.Migrations
                     b.ToTable("SubCategories");
                 });
 
+            modelBuilder.Entity("Registration.Models.LoginRequest", b =>
+                {
+                    b.Property<string>("Username")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("RememberMe")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Username");
+
+                    b.ToTable("loginRequests");
+                });
+
 
             modelBuilder.Entity("Business.Models.Busines", b =>
                 {
@@ -263,8 +279,8 @@ namespace Business.Migrations
             modelBuilder.Entity("Business.Models.BusinessRatings", b =>
                 {
                     b.HasOne("Business.Models.Busines", "Business")
+                        .WithMany()
 
-                        .WithMany("BusinessRatings")
                         .HasForeignKey("BusinessID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -272,18 +288,7 @@ namespace Business.Migrations
                     b.Navigation("Business");
                 });
 
-
-            modelBuilder.Entity("Business.Models.Customer", b =>
-                {
-                    b.HasOne("Business.Models.Role", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
+    
             modelBuilder.Entity("Business.Models.SubCategory", b =>
                 {
                     b.HasOne("Business.Models.Category", "Category")
