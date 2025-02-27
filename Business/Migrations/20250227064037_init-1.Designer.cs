@@ -4,6 +4,7 @@ using Business.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,12 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Business.Migrations
 {
     [DbContext(typeof(BusinessContext))]
-    partial class BusinessContextModelSnapshot : ModelSnapshot
+
+    [Migration("20250227064037_init-1")]
+    partial class init1
+
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -121,6 +125,7 @@ namespace Business.Migrations
 
                     b.Property<decimal>("Rating")
                         .HasColumnType("decimal(3,2)");
+
 
                     b.HasKey("BusinessRatingID");
 
@@ -235,6 +240,7 @@ namespace Business.Migrations
                     b.ToTable("SubCategories");
                 });
 
+
             modelBuilder.Entity("Business.Models.Busines", b =>
                 {
                     b.HasOne("Business.Models.Role", "Role")
@@ -257,6 +263,7 @@ namespace Business.Migrations
             modelBuilder.Entity("Business.Models.BusinessRatings", b =>
                 {
                     b.HasOne("Business.Models.Busines", "Business")
+
                         .WithMany("BusinessRatings")
                         .HasForeignKey("BusinessID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -264,6 +271,7 @@ namespace Business.Migrations
 
                     b.Navigation("Business");
                 });
+
 
             modelBuilder.Entity("Business.Models.Customer", b =>
                 {
@@ -274,17 +282,6 @@ namespace Business.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("Business.Models.BusinessRatings", b =>
-                {
-                    b.HasOne("Business.Models.Busines", "Business")
-                        .WithMany("BusinessRatings")
-                        .HasForeignKey("BusinessID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Business");
                 });
 
             modelBuilder.Entity("Business.Models.SubCategory", b =>

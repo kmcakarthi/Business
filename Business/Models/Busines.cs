@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Business.Models
 {
@@ -16,9 +17,13 @@ namespace Business.Models
         public double Longitude { get; set; }
         public int? CategoryID { get; set; } // Not nullable
         public int SubCategoryID { get; set; } // Foreign key
+        public int RoleID { get; set; }
 
-        // Navigation property
+        // Navigation property for SubCategory
         public SubCategory SubCategory { get; set; } = null!;
+        // Navigation property for Role
+        [ForeignKey("RoleID")]
+        public Role Role { get; set; } = null!;
         public ICollection<BusinessRatings> BusinessRatings { get; set; }
     }
 }
