@@ -74,13 +74,7 @@ namespace Business.Controllers
 
                     // Convert to a relative path (for storing in the database)
                     filePath = Path.Combine("uploads", uniqueFileName);
-                }
-
-                bool isRegistered = await _context.Businesses.AnyAsync(u => u.EmailId == businesDto.EmailId && u.Name == businesDto.Name);
-                if (isRegistered)
-                {
-                    return Ok(new { message = "Email is already registered." });
-                }
+                }               
 
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(businesDto.Password);
 

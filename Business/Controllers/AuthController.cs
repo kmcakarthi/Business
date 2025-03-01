@@ -20,12 +20,14 @@ namespace Banking_Application.Controllers
         private readonly BusinessContext _context;
         private readonly IConfiguration _configuration;
         private readonly EmailService _emailService;
+        private readonly SubAdminServices _subAdminServices;
 
-        public AuthController(BusinessContext context, IConfiguration configuration, EmailService emailService)
+        public AuthController(BusinessContext context, IConfiguration configuration, EmailService emailService, SubAdminServices subAdminServices)
         {
             _context = context;
             _configuration = configuration;
             _emailService = emailService;
+            _subAdminServices = subAdminServices;
         }        
 
         [HttpPost("login")]
@@ -34,6 +36,8 @@ namespace Banking_Application.Controllers
             try
             {
                 var token = "";
+                var roleId = 0;
+
                 if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
                     return BadRequest("Username or password cannot be empty.");
 
@@ -42,6 +46,7 @@ namespace Banking_Application.Controllers
 
                 if (userBusiness != null && userBusiness.RoleID == 3)
                 {
+                    roleId = userBusiness.RoleID;
                     // Verify the password
                     if (!BCrypt.Net.BCrypt.Verify(request.Password.Trim(), userBusiness.Password))
                     {
@@ -50,7 +55,7 @@ namespace Banking_Application.Controllers
 
                     // Generate token for Business
                     token = GenerateBusinessToken(userBusiness);
-                    return Ok(new { token });
+                    return Ok(new { token, roleId });
                 }
 
                 // Try to authenticate as Customer
@@ -58,6 +63,7 @@ namespace Banking_Application.Controllers
 
                 if (userCustomer != null && userBusiness.RoleID == 4)
                 {
+                    roleId = userBusiness.RoleID;
                     // Verify the password
                     if (!BCrypt.Net.BCrypt.Verify(request.Password, userCustomer.Cus_Password))
                     {
@@ -66,12 +72,13 @@ namespace Banking_Application.Controllers
 
                     // Generate token for Customer
                     token = GenerateCustomerToken(userCustomer);
-                    return Ok(new { token });
+                    return Ok(new { token, roleId });
                 }
                 var admin = _context.AdminLoginRequests.Where(x => x.EmailId == request.Username).FirstOrDefault();
 
-                if (admin != null && admin.RoleId == 1)
+                if (admin != null)
                 {
+                    roleId = admin.RoleId;
                     // Verify the password
                     string HashedPassword = BCrypt.Net.BCrypt.HashPassword(admin.AdminPassword);
 
@@ -82,8 +89,7 @@ namespace Banking_Application.Controllers
 
                     // Generate token for Admin
                     token = GenerateTokenforAdmin(admin);
-                    return Ok(new { token });
-
+                    return Ok(new { token, admin.IsPasswordChanged, roleId });
                 }
 
                 return Unauthorized("Invalid username or password.");
@@ -261,7 +267,9 @@ namespace Banking_Application.Controllers
         private string GenerateTokenforAdmin(AdminLoginRequest adminLogin)
         {
             var claims = new[] {
-            new Claim(ClaimTypes.Email, adminLogin.EmailId)
+            new Claim("EmailId", adminLogin.EmailId),
+            new Claim("Id", adminLogin.Id.ToString()),
+            new Claim("RoleId", adminLogin.RoleId.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));

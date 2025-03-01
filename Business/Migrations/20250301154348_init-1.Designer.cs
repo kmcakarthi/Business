@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Business.Migrations
 {
     [DbContext(typeof(BusinessContext))]
-    [Migration("20250227064037_init-1")]
+    [Migration("20250301154348_init-1")]
     partial class init1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,9 @@ namespace Business.Migrations
                     b.Property<string>("EmailId")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsPasswordChanged")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("integer");

@@ -52,13 +52,11 @@ namespace Business.Controllers
                 };
                 _context.Customers.Add(customerObj);
                 await _context.SaveChangesAsync();
-                return Ok(new { data = "pass" });
+                return Ok(true);
             }
             catch (Exception ex)
             {
-                // Log the exception (optional)
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    new { message = "An error occurred while processing your request.", details = ex.Message }); // HTTP 500 Internal Server Error
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 

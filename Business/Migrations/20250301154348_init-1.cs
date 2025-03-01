@@ -18,7 +18,8 @@ namespace Business.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     EmailId = table.Column<string>(type: "text", nullable: false),
                     AdminPassword = table.Column<string>(type: "text", nullable: false),
-                    RoleId = table.Column<int>(type: "integer", nullable: false)
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    IsPasswordChanged = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {

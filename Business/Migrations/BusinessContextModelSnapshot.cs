@@ -38,6 +38,9 @@ namespace Business.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsPasswordChanged")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("RoleId")
                         .HasColumnType("integer");
 

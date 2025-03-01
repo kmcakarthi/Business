@@ -9,5 +9,6 @@ namespace Business.Models
         public string EmailId { get; set; }
         public string AdminPassword { get; set; }
         public int RoleId { get; set; }
+        public bool IsPasswordChanged { get; set; }
     }
 }
