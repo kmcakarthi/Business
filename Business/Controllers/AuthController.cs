@@ -36,7 +36,7 @@ namespace Banking_Application.Controllers
             try
             {
                 var token = "";
-                int roleId = 0;
+                var roleId = 0;
 
                 if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
                     return BadRequest("Username or password cannot be empty.");
@@ -274,6 +274,9 @@ namespace Banking_Application.Controllers
             new Claim("EmailId", adminLogin.EmailId),
             new Claim("Id", adminLogin.Id.ToString()),
             new Claim("RoleId", adminLogin.RoleId.ToString())
+            new Claim(ClaimTypes.Email, adminLogin.EmailId),
+           new Claim("EmailId", adminLogin.EmailId)
+
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
