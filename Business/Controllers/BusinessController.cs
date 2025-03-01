@@ -290,7 +290,7 @@ namespace Business.Controllers
         //            TotalRecords = totalRecords,
         //            PageNumber = pageNumber,
         //            PageSize = pageSize,
-        //            TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
+        //            TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize), //
         //            Data = businesses
         //        };
 
@@ -298,7 +298,7 @@ namespace Business.Controllers
         //    }
         //    catch (Exception ex)
         //    {
-        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        ///        return StatusCode(500, $"Internal server error: {ex.Message}");
         //    }
         //}
 

@@ -274,9 +274,6 @@ namespace Banking_Application.Controllers
             new Claim("EmailId", adminLogin.EmailId),
             new Claim("Id", adminLogin.Id.ToString()),
             new Claim("RoleId", adminLogin.RoleId.ToString())
-            new Claim(ClaimTypes.Email, adminLogin.EmailId),
-           new Claim("EmailId", adminLogin.EmailId)
-
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
