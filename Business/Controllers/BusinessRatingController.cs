@@ -55,7 +55,7 @@ namespace Business.Controllers
 
             if (!ratings.Any()) // Check if there are no ratings
             {
-                return NotFound("No ratings found for this business.");
+                return Ok(new { message = "No ratings found for this business.." });
             }
 
             return Ok(ratings);
