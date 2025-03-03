@@ -61,9 +61,9 @@ namespace Banking_Application.Controllers
                 // Try to authenticate as Customer
                 var userCustomer = _context.Customers.Where(x => x.Cus_EmailId == request.Username).FirstOrDefault();
 
-                if (userCustomer != null && userBusiness.RoleID == 4)
+                if (userCustomer != null && userCustomer.RoleID == 4)
                 {
-                    roleId = userBusiness.RoleID;
+                    roleId = userCustomer.RoleID;
                     // Verify the password
                     if (!BCrypt.Net.BCrypt.Verify(request.Password, userCustomer.Cus_Password))
                     {
