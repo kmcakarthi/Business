@@ -73,7 +73,7 @@ namespace Banking_Application.Controllers
                     roleId = adminUser.RoleId;
                     isPasswordChanged = adminUser.IsPasswordChanged;
 
-                    // Compare password directly instead of hashing stored password again
+                    // Compare password directly instead of hashing stored password again//
                     if (!BCrypt.Net.BCrypt.Verify(request.Password, adminUser.AdminPassword))
                         return Unauthorized("Invalid username or password.");
 
