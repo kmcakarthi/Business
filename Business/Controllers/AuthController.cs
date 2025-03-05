@@ -28,68 +28,57 @@ namespace Banking_Application.Controllers
             _configuration = configuration;
             _emailService = emailService;
             _subAdminServices = subAdminServices;
-        }        
+        }
 
         [HttpPost("login")]
         public IActionResult Login(Business.Models.LoginRequest request)
         {
             try
             {
-                var token = "";
-                var roleId = 0;
-
                 if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
                     return BadRequest("Username or password cannot be empty.");
 
-                // Try to authenticate as Business
-                var userBusiness = _context.Businesses.Where(u => u.EmailId == request.Username).FirstOrDefault();
+                string token = "";
+                int roleId = 0;
+                bool isPasswordChanged = true;
 
-                if (userBusiness != null && userBusiness.RoleID == 3)
+                // Check if user is a Business
+                var userBusiness = _context.Businesses.FirstOrDefault(u => u.EmailId == request.Username && u.RoleID != 3);
+                if (userBusiness != null)
                 {
                     roleId = userBusiness.RoleID;
-                    // Verify the password
                     if (!BCrypt.Net.BCrypt.Verify(request.Password.Trim(), userBusiness.Password))
-                    {
                         return Unauthorized("Invalid username or password.");
-                    }
 
-                    // Generate token for Business
                     token = GenerateBusinessToken(userBusiness);
                     return Ok(new { token, roleId });
                 }
 
-                // Try to authenticate as Customer
-                var userCustomer = _context.Customers.Where(x => x.Cus_EmailId == request.Username).FirstOrDefault();
-
-                if (userCustomer != null && userCustomer.RoleID == 4)
+                // Check if user is a Customer
+                var userCustomer = _context.Customers.FirstOrDefault(x => x.Cus_EmailId == request.Username && u.RoleID != 4);
+                if (userCustomer != null)
                 {
                     roleId = userCustomer.RoleID;
-                    // Verify the password
                     if (!BCrypt.Net.BCrypt.Verify(request.Password, userCustomer.Cus_Password))
-                    {
                         return Unauthorized("Invalid username or password.");
-                    }
 
-                    // Generate token for Customer
                     token = GenerateCustomerToken(userCustomer);
                     return Ok(new { token, roleId });
                 }
-                var admin = _context.AdminLoginRequests.Where(x => x.EmailId == request.Username).FirstOrDefault();
 
-                if (admin != null)
+                // Check if user is an Admin or Sub-Admin
+                var adminUser = _context.AdminLoginRequests.FirstOrDefault(x => x.EmailId == request.Username);
+                if (adminUser != null)
                 {
-                    roleId = admin.RoleId;
-                    // Verify the password
-                    string HashedPassword = BCrypt.Net.BCrypt.HashPassword(admin.AdminPassword);
+                    roleId = adminUser.RoleId;
+                    isPasswordChanged = adminUser.IsPasswordChanged;
 
-                    if (!BCrypt.Net.BCrypt.Verify(request.Password, HashedPassword))
-                    {
+                    // Compare password directly instead of hashing stored password again
+                    if (!BCrypt.Net.BCrypt.Verify(request.Password, adminUser.AdminPassword))
                         return Unauthorized("Invalid username or password.");
-                    }
 
-                    // Generate token for Admin
-                    token = GenerateTokenforAdmin(admin);
-                    return Ok(new { token, admin.IsPasswordChanged, roleId });
+                    token = GenerateTokenforAdmin(adminUser);
+                    return Ok(new { token, isPasswordChanged, roleId });
                 }
 
                 return Unauthorized("Invalid username or password.");
@@ -99,6 +88,7 @@ namespace Banking_Application.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         private string GenerateBusinessToken(Busines business)
         {
