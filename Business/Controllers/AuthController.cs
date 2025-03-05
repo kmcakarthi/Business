@@ -55,7 +55,7 @@ namespace Banking_Application.Controllers
                 }
 
                 // Check if user is a Customer
-                var userCustomer = _context.Customers.FirstOrDefault(x => x.Cus_EmailId == request.Username && u.RoleID != 4);
+                var userCustomer = _context.Customers.FirstOrDefault(x => x.Cus_EmailId == request.Username && x.RoleID != 4);
                 if (userCustomer != null)
                 {
                     roleId = userCustomer.RoleID;
