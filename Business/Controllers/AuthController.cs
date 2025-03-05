@@ -43,7 +43,7 @@ namespace Banking_Application.Controllers
                 bool isPasswordChanged = true;
 
                 // Check if user is a Business
-                var userBusiness = _context.Businesses.FirstOrDefault(u => u.EmailId == request.Username && u.RoleID != 3);
+                var userBusiness = _context.Businesses.FirstOrDefault(u => u.EmailId == request.Username);
                 if (userBusiness != null)
                 {
                     roleId = userBusiness.RoleID;
@@ -55,7 +55,7 @@ namespace Banking_Application.Controllers
                 }
 
                 // Check if user is a Customer
-                var userCustomer = _context.Customers.FirstOrDefault(x => x.Cus_EmailId == request.Username && x.RoleID != 4);
+                var userCustomer = _context.Customers.FirstOrDefault(x => x.Cus_EmailId == request.Username);
                 if (userCustomer != null)
                 {
                     roleId = userCustomer.RoleID;
