@@ -1,14 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace Business.Migrations
 {
-    public partial class initialization : Migration
+    public partial class init1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AdminLoginRequests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    EmailId = table.Column<string>(type: "text", nullable: false),
+                    AdminPassword = table.Column<string>(type: "text", nullable: false),
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    IsPasswordChanged = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AdminLoginRequests", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
@@ -20,21 +37,6 @@ namespace Business.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.CategoryID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Customers",
-                columns: table => new
-                {
-                    Cus_Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Cus_EmailId = table.Column<string>(type: "text", nullable: true),
-                    Cus_Password = table.Column<string>(type: "text", nullable: true),
-                    Cus_Location = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Customers", x => x.Cus_Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -51,17 +53,16 @@ namespace Business.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    RoleID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Username = table.Column<string>(type: "text", nullable: false),
-                    Password = table.Column<string>(type: "text", nullable: false)
+                    Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Roles", x => x.RoleID);
                 });
 
             migrationBuilder.CreateTable(
@@ -85,6 +86,30 @@ namespace Business.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Customers",
+                columns: table => new
+                {
+                    Cus_Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Cus_EmailId = table.Column<string>(type: "text", nullable: true),
+                    Cus_Password = table.Column<string>(type: "text", nullable: true),
+                    Cus_Location = table.Column<string>(type: "text", nullable: true),
+                    Latitude = table.Column<double>(type: "double precision", nullable: false),
+                    Longitude = table.Column<double>(type: "double precision", nullable: false),
+                    RoleID = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Customers", x => x.Cus_Id);
+                    table.ForeignKey(
+                        name: "FK_Customers_Roles_RoleID",
+                        column: x => x.RoleID,
+                        principalTable: "Roles",
+                        principalColumn: "RoleID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Businesses",
                 columns: table => new
                 {
@@ -99,11 +124,18 @@ namespace Business.Migrations
                     Latitude = table.Column<double>(type: "double precision", nullable: false),
                     Longitude = table.Column<double>(type: "double precision", nullable: false),
                     CategoryID = table.Column<int>(type: "integer", nullable: true),
-                    SubCategoryID = table.Column<int>(type: "integer", nullable: false)
+                    SubCategoryID = table.Column<int>(type: "integer", nullable: false),
+                    RoleID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Businesses", x => x.BusinessID);
+                    table.ForeignKey(
+                        name: "FK_Businesses_Roles_RoleID",
+                        column: x => x.RoleID,
+                        principalTable: "Roles",
+                        principalColumn: "RoleID",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Businesses_SubCategories_SubCategoryID",
                         column: x => x.SubCategoryID,
@@ -112,10 +144,48 @@ namespace Business.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "BusinessRatings",
+                columns: table => new
+                {
+                    BusinessRatingID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    BusinessID = table.Column<int>(type: "integer", nullable: false),
+                    Rating = table.Column<decimal>(type: "numeric(3,2)", nullable: false),
+                    RatedBy = table.Column<string>(type: "text", nullable: false),
+                    Comment = table.Column<string>(type: "text", nullable: true),
+                    DateTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BusinessRatings", x => x.BusinessRatingID);
+                    table.ForeignKey(
+                        name: "FK_BusinessRatings_Businesses_BusinessID",
+                        column: x => x.BusinessID,
+                        principalTable: "Businesses",
+                        principalColumn: "BusinessID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Businesses_RoleID",
+                table: "Businesses",
+                column: "RoleID");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Businesses_SubCategoryID",
                 table: "Businesses",
                 column: "SubCategoryID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BusinessRatings_BusinessID",
+                table: "BusinessRatings",
+                column: "BusinessID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Customers_RoleID",
+                table: "Customers",
+                column: "RoleID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SubCategories_CategoryID",
@@ -126,7 +196,10 @@ namespace Business.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Businesses");
+                name: "AdminLoginRequests");
+
+            migrationBuilder.DropTable(
+                name: "BusinessRatings");
 
             migrationBuilder.DropTable(
                 name: "Customers");
@@ -135,7 +208,10 @@ namespace Business.Migrations
                 name: "loginRequests");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Businesses");
+
+            migrationBuilder.DropTable(
+                name: "Roles");
 
             migrationBuilder.DropTable(
                 name: "SubCategories");

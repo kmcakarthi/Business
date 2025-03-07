@@ -9,13 +9,16 @@ builder.Services.AddHttpClient<GeocodingService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-            builder => builder.WithOrigins("https://sasmita2622606.github.io")   //deployed url https://sasmita2622606.github.io, http://localhost:4200
+            builder => builder.WithOrigins("https://sasmita2622606.github.io")
+            .AllowAnyOrigin()//deployed url https://sasmita2622606.github.io, http://localhost:4200
                               .AllowAnyHeader()
                               .AllowAnyMethod());
 });
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddTransient<EmailService>();
+builder.Services.AddTransient<SubAdminServices>();
 //builder.Services.AddDbContext<BusinessContext>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDbContext<BusinessContext>(options =>

@@ -5,9 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Win32;
 using Microsoft.EntityFrameworkCore;
-using Banking_Application.Models;
 using Microsoft.IdentityModel.Tokens;
-using Registration.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -76,13 +74,7 @@ namespace Business.Controllers
 
                     // Convert to a relative path (for storing in the database)
                     filePath = Path.Combine("uploads", uniqueFileName);
-                }
-
-                bool isRegistered = await _context.Businesses.AnyAsync(u => u.EmailId == businesDto.EmailId && u.Name == businesDto.Name);
-                if (isRegistered)
-                {
-                    return Ok(new { message = "Email is already registered." });
-                }
+                }               
 
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(businesDto.Password);
 
@@ -97,7 +89,8 @@ namespace Business.Controllers
                     Longitude = businesDto.Longitude,
                     VisitingCard = filePath,
                     CategoryID = businesDto.CategoryID,
-                    SubCategoryID = businesDto.SubCategoryID
+                    SubCategoryID = businesDto.SubCategoryID,
+                    RoleID = 3 // Business role
                 };
                 _context.Businesses.Add(business);
                 int regStatus = await _context.SaveChangesAsync();
@@ -179,7 +172,11 @@ namespace Business.Controllers
         [HttpGet("check-email")]
         public async Task<ActionResult<bool>> CheckEmailExistsBusiness(string email)
         {
-            bool exists = await _context.Businesses.AnyAsync(u => u.EmailId == email);
+            //bool exists = await _context.Businesses.AnyAsync(u => u.EmailId == email);
+            //return Ok(exists);
+            bool exists = await _context.Businesses.AnyAsync(b => b.EmailId == email) ||
+                  await _context.Customers.AnyAsync(c => c.Cus_EmailId == email);
+
             return Ok(exists);
         }
 
@@ -231,10 +228,10 @@ namespace Business.Controllers
         {
             try
             {
-                
                 var businesses = await _context.Businesses
                 .Include(b => b.SubCategory)
                 .ThenInclude(sc => sc.Category)
+                .Include(b => b.BusinessRatings)
                 .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory)
                 .Select(b => new BusinessDataShow
                 {
@@ -245,7 +242,9 @@ namespace Business.Controllers
                     longitude = b.Longitude,
                     Latitude = b.Latitude,
                     VisitingCard = b.VisitingCard,
-                    Location = b.Location
+                    Location = b.Location,
+                    AverageRating = b.BusinessRatings.Any() ? b.BusinessRatings.Average(br => br.Rating) : 0,
+                    RoleID = b.RoleID
                 })
                 .ToListAsync();
                 return Ok(businesses);
@@ -255,6 +254,57 @@ namespace Business.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        
+        //[HttpGet("search")]
+        //public async Task<IActionResult> SearchBusinesses(string category, string subcategory, int pageNumber = 1, int pageSize = 2)
+        //{
+        //    try
+        //    {
+        //        if (pageNumber < 1) pageNumber = 1;
+        //        if (pageSize < 1) pageSize = 10;
+
+        //        var query = _context.Businesses
+        //            .Include(b => b.SubCategory)
+        //            .ThenInclude(sc => sc.Category)
+        //            .Where(b => b.SubCategory.Category.CategoryName == category && b.SubCategory.SubCategoryName == subcategory);
+
+        //        // Get total records count
+        //        var totalRecords = await query.CountAsync();
+
+        //        // Apply pagination
+        //        var businesses = await query
+        //            .Skip((pageNumber - 1) * pageSize)
+        //            .Take(pageSize)
+        //            .Select(b => new BusinessDataShow
+        //            {
+        //                BusinessID = b.BusinessID,
+        //                Name = b.Name,
+        //                Description = b.Description,
+        //                Distancekm = b.Latitude + b.Longitude,
+        //                longitude = b.Longitude,
+        //                Latitude = b.Latitude,
+        //                VisitingCard = b.VisitingCard,
+        //                Location = b.Location
+        //            })
+        //            .ToListAsync();
+
+        //        // Pagination metadata
+        //        var pagination = new
+        //        {
+        //            TotalRecords = totalRecords,
+        //            PageNumber = pageNumber,
+        //            PageSize = pageSize,
+        //            TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize), //
+        //            Data = businesses
+        //        };
+
+        //        return Ok(pagination);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        ///        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
 
         [HttpGet("getbusinessdetailbyid/{id}")]
         public async Task<IActionResult> GetBusineesDetailById(int id)
@@ -273,7 +323,8 @@ namespace Business.Controllers
                     Latitude = b.Latitude,
                     Longitude = b.Longitude,
                     CategoryID = b.CategoryID,
-                    SubCategoryID = b.SubCategoryID                    
+                    SubCategoryID = b.SubCategoryID,
+                    RoleID = b.RoleID
                 }).ToListAsync();
 
                 return Ok(businesses);

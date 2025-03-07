@@ -22,7 +22,7 @@ namespace Business.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Banking_Application.Models.User", b =>
+            modelBuilder.Entity("Business.Models.AdminLoginRequest", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,17 +30,23 @@ namespace Business.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Password")
+                    b.Property<string>("AdminPassword")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Username")
+                    b.Property<string>("EmailId")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsPasswordChanged")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("AdminLoginRequests");
                 });
 
             modelBuilder.Entity("Business.Models.Busines", b =>
@@ -77,6 +83,9 @@ namespace Business.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("text");
 
+                    b.Property<int>("RoleID")
+                        .HasColumnType("integer");
+
                     b.Property<int>("SubCategoryID")
                         .HasColumnType("integer");
 
@@ -85,9 +94,42 @@ namespace Business.Migrations
 
                     b.HasKey("BusinessID");
 
+                    b.HasIndex("RoleID");
+
                     b.HasIndex("SubCategoryID");
 
                     b.ToTable("Businesses");
+                });
+
+            modelBuilder.Entity("Business.Models.BusinessRatings", b =>
+                {
+                    b.Property<int>("BusinessRatingID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("BusinessRatingID"));
+
+                    b.Property<int>("BusinessID")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RatedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Rating")
+                        .HasColumnType("numeric(3,2)");
+
+                    b.HasKey("BusinessRatingID");
+
+                    b.HasIndex("BusinessID");
+
+                    b.ToTable("BusinessRatings");
                 });
 
             modelBuilder.Entity("Business.Models.Category", b =>
@@ -130,9 +172,48 @@ namespace Business.Migrations
                     b.Property<double>("Longitude")
                         .HasColumnType("double precision");
 
+                    b.Property<int>("RoleID")
+                        .HasColumnType("integer");
+
                     b.HasKey("Cus_Id");
 
+                    b.HasIndex("RoleID");
+
                     b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("Business.Models.LoginRequest", b =>
+                {
+                    b.Property<string>("Username")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("RememberMe")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Username");
+
+                    b.ToTable("loginRequests");
+                });
+
+            modelBuilder.Entity("Business.Models.Role", b =>
+                {
+                    b.Property<int>("RoleID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RoleID"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("RoleID");
+
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("Business.Models.SubCategory", b =>
@@ -157,32 +238,45 @@ namespace Business.Migrations
                     b.ToTable("SubCategories");
                 });
 
-            modelBuilder.Entity("Registration.Models.LoginRequest", b =>
-                {
-                    b.Property<string>("Username")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("RememberMe")
-                        .HasColumnType("boolean");
-
-                    b.HasKey("Username");
-
-                    b.ToTable("loginRequests");
-                });
-
             modelBuilder.Entity("Business.Models.Busines", b =>
                 {
+                    b.HasOne("Business.Models.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Business.Models.SubCategory", "SubCategory")
                         .WithMany("Businesses")
                         .HasForeignKey("SubCategoryID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Role");
+
                     b.Navigation("SubCategory");
+                });
+
+            modelBuilder.Entity("Business.Models.BusinessRatings", b =>
+                {
+                    b.HasOne("Business.Models.Busines", "Business")
+                        .WithMany("BusinessRatings")
+                        .HasForeignKey("BusinessID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("Business.Models.Customer", b =>
+                {
+                    b.HasOne("Business.Models.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Business.Models.SubCategory", b =>
@@ -194,6 +288,11 @@ namespace Business.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("Business.Models.Busines", b =>
+                {
+                    b.Navigation("BusinessRatings");
                 });
 
             modelBuilder.Entity("Business.Models.Category", b =>
