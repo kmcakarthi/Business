@@ -26,7 +26,12 @@ namespace Business.Controllers
         [HttpPost("add-sub-admin")]
         public async Task<IActionResult> AddSubAdmin(string email)
         {
-           var defaultPassword =  await _subAdminServices.GetEmailSubAdmin(email);
+            bool exists = await _businessContext.AdminLoginRequests.AnyAsync(u => u.EmailId == email);
+            if (exists)
+            {
+                return Ok(new { messege = "duplicate" });
+            }
+            var defaultPassword =  await _subAdminServices.GetEmailSubAdmin(email);
 
             var adminLoginRequest = new AdminLoginRequest
             {
@@ -37,8 +42,8 @@ namespace Business.Controllers
             };
             await _businessContext.AdminLoginRequests.AddAsync(adminLoginRequest);
             await _businessContext.SaveChangesAsync();
-            Console.WriteLine("Data inserted successfully.");
-            return Ok(new { message = "Sub-admin added and email sent." });
+            // don't change value of messege property, as it's value is dependent on dialog box type in UI side
+            return Ok(new { message = "success" });
         }
 
         [HttpGet("check-email")]
