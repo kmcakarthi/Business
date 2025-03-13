@@ -40,8 +40,8 @@ namespace Business.Controllers
                 RoleId = 2,
                 IsPasswordChanged = false
             };
-            //await _businessContext.AdminLoginRequests.AddAsync(adminLoginRequest);
-            //await _businessContext.SaveChangesAsync();
+            await _businessContext.AdminLoginRequests.AddAsync(adminLoginRequest);
+            await _businessContext.SaveChangesAsync();
             // don't change value of messege property, as it's value is dependent on dialog box type in UI side
             return Ok(new { messege = "success" });
         }
