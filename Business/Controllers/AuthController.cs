@@ -43,7 +43,7 @@ namespace Banking_Application.Controllers
                 int roleId = 0;
                 bool isPasswordChanged = true;                
 
-                var adminUser = _context.AdminLoginRequests.FirstOrDefault(x => x.EmailId == request.Username && x.AdminPassword == request.Password);
+                var adminUser = _context.AdminLoginRequests.FirstOrDefault(x => x.EmailId == request.Username);
 
                 if (adminUser != null && ( adminUser.RoleId == 1 || adminUser.RoleId == 2))
                 {
