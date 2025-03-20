@@ -330,5 +330,33 @@ namespace Business.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-    }    
+
+        [HttpPut("updatebusinessdetails")]
+        public async Task<IActionResult> UpdateBusinessDetails([FromForm] BusinesDto businessDto)
+        {
+           
+
+            var existingBusiness = await _context.Businesses.FindAsync(businessDto.BusinessID);
+
+            if (existingBusiness == null)
+            {
+                return NotFound("Business not found.");
+            }
+
+            // Map the DTO fields to the existing entity
+            existingBusiness.Name = businessDto.Name;
+            existingBusiness.EmailId = businessDto.EmailId;
+            existingBusiness.Description = businessDto.Description;
+            existingBusiness.Location = businessDto.Location;
+            existingBusiness.SubCategoryID = businessDto.SubCategoryID;
+            existingBusiness.CategoryID = businessDto.CategoryID;
+            // Add other fields as necessary
+
+            _context.Businesses.Update(existingBusiness);
+            await _context.SaveChangesAsync();
+
+            return Ok(true);
+        }
+
+    }
 }
