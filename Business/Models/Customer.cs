@@ -17,5 +17,6 @@ namespace Business.Models
         // Navigation property
         [ForeignKey("RoleID")]
         public Role Role { get; set; } = null!;
+        public int? PinCode { get; set; }
     }
 }

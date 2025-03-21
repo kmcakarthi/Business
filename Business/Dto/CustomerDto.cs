@@ -8,5 +8,6 @@
         public string? Cus_Location { get; set; }
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+        public int? pinCode { get; set; }
     }
 }

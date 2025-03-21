@@ -48,7 +48,8 @@ namespace Business.Controllers
                     Cus_Location = customerDto.Cus_Location,
                     Longitude = customerDto.Longitude,
                     Latitude = customerDto.Latitude,
-                    RoleID = 4
+                    RoleID = 4,
+                    PinCode = customerDto.pinCode
                 };
                 _context.Customers.Add(customerObj);
                 await _context.SaveChangesAsync();
