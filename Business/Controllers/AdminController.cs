@@ -76,42 +76,87 @@ namespace Business.Controllers
             var jwtToken = (JwtSecurityToken)securityToken;
 
             var emailIdfromToken = jwtToken.Claims.First(x => x.Type == "EmailId").Value;
+            var roleIdfromToken = jwtToken.Claims.First(x => x.Type == "RoleID").Value;
 
-            // Check if the user is a Business
-            var admin = _businessContext.AdminLoginRequests.SingleOrDefault(u => u.EmailId == emailIdfromToken);
-            if (admin == null)
+            if (roleIdfromToken == "2")
             {
-                return BadRequest("User not found.");
-            }
 
-            // Verify if the current password matches the stored password (default or user-provided)
-            if (admin.AdminPassword != request.CurrentPassword)
-            {
-                return Unauthorized("Current password mismatch.");
-            }
+                // Check if the user is a Business
+                var admin = _businessContext.AdminLoginRequests.SingleOrDefault(u => u.EmailId == emailIdfromToken);
+                if (admin == null)
+                {
+                    return BadRequest("User not found.");
+                }
 
-            if (admin.AdminPassword == request.NewPassword)
-            {
-                return BadRequest("new password should not be same as current password.");
-            }
+                // Verify if the current password matches the stored password (default or user-provided)
+                if (admin.AdminPassword != request.CurrentPassword)
+                {
+                    return Unauthorized("Current password mismatch.");
+                }
 
-            // Validate new password - check with password requirement and should not be same with last
-            if (request.NewPassword.Length < 6)
-            {
-                return BadRequest("New password does not meet the complexity requirements.");
-            }
+                if (admin.AdminPassword == request.NewPassword)
+                {
+                    return BadRequest("new password should not be same as current password.");
+                }
 
-            // update the password in Admin table
-            admin.EmailId = emailIdfromToken;
-            admin.AdminPassword = request.NewPassword;
-            admin.RoleId = 2;
-            admin.IsPasswordChanged = true;
-            var updateSuccess = _businessContext.AdminLoginRequests.Update(admin);
-            if (updateSuccess == null)
-            {
-                return BadRequest("Failed to change password.");
+                // Validate new password - check with password requirement and should not be same with last
+                if (request.NewPassword.Length < 6)
+                {
+                    return BadRequest("New password does not meet the complexity requirements.");
+                }
+
+                // update the password in Admin table
+                admin.EmailId = emailIdfromToken;
+                admin.AdminPassword = request.NewPassword;
+                admin.RoleId = 2;
+                admin.IsPasswordChanged = true;
+                var updateSuccess = _businessContext.AdminLoginRequests.Update(admin);
+                if (updateSuccess == null)
+                {
+                    return BadRequest("Failed to change password.");
+                }
+                await _businessContext.SaveChangesAsync();                
             }
-            await _businessContext.SaveChangesAsync();
+            else
+            {
+                // Check if the user is a Business
+                var user = _businessContext.Businesses.SingleOrDefault(u => u.EmailId == emailIdfromToken);
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var HashedUserPassword = BCrypt.Net.BCrypt.HashPassword(request.CurrentPassword);
+                var StoredHashedPassword = user.Password; // Stored password hash from database
+
+                // Verify if the current password matches the stored password
+                if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, StoredHashedPassword))
+                {
+                    return Unauthorized("Current password mismatch.");
+                }
+
+                if (request.CurrentPassword == request.NewPassword)
+                {
+                    return BadRequest("new password should not be same as current password.");
+                }
+
+                // Validate new password - check with password requirement and should not be same with last
+                if (request.NewPassword.Length < 6)
+                {
+                    return BadRequest("New password does not meet the complexity requirements.");
+                }
+
+                // update the password in Admin table
+                user.EmailId = emailIdfromToken;
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+                user.Password = hashedPassword;                
+                var updateSuccess = _businessContext.Businesses.Update(user);
+                if (updateSuccess == null)
+                {
+                    return BadRequest("Failed to change password.");
+                }
+                await _businessContext.SaveChangesAsync();
+            }
             return Ok(new { message = "Password changed successfully." });
         }
     }

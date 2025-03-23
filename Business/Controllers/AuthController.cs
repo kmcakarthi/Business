@@ -96,10 +96,10 @@ namespace Banking_Application.Controllers
         private string GenerateBusinessToken(Busines business)
         {
             var claims = new[] {
-                new Claim(ClaimTypes.Email, business.EmailId),
+                new Claim("EmailId", business.EmailId),
                 new Claim("BusinessID", business.BusinessID.ToString()),
-                new Claim("EmailId", business.EmailId.ToString())
-
+                new Claim("EmailId", business.EmailId.ToString()),
+                new Claim("RoleID", business.RoleID.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
@@ -118,10 +118,10 @@ namespace Banking_Application.Controllers
         private string GenerateCustomerToken(Customer customer)
         {
             var claims = new[] {
-                new Claim(ClaimTypes.Email, customer.Cus_EmailId),
+                new Claim("Email", customer.Cus_EmailId),
                 new Claim("Cus_Id", customer.Cus_Id.ToString()),
-                new Claim("EmailId", customer.Cus_EmailId.ToString())
-
+                new Claim("EmailId", customer.Cus_EmailId.ToString()),
+                new Claim("RoleID", customer.RoleID.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
@@ -266,7 +266,7 @@ namespace Banking_Application.Controllers
             var claims = new[] {
             new Claim("EmailId", adminLogin.EmailId),
             new Claim("Id", adminLogin.Id.ToString()),
-            new Claim("RoleId", adminLogin.RoleId.ToString())
+            new Claim("RoleID", adminLogin.RoleId.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
