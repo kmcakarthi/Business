@@ -31,7 +31,7 @@ namespace Business.Controllers
             {
                 return Ok(new { messege = "duplicate" });
             }
-            var defaultPassword =  await _subAdminServices.GetEmailSubAdmin(email);
+            var defaultPassword = await _subAdminServices.GetEmailSubAdmin(email);
 
             var adminLoginRequest = new AdminLoginRequest
             {
@@ -115,11 +115,11 @@ namespace Business.Controllers
                 {
                     return BadRequest("Failed to change password.");
                 }
-                await _businessContext.SaveChangesAsync();                
+                await _businessContext.SaveChangesAsync();
             }
-            else
+            else if (roleIdfromToken == "3")
             {
-                // Check if the user is a Business
+                // Check if the user is a Business           
                 var user = _businessContext.Businesses.SingleOrDefault(u => u.EmailId == emailIdfromToken);
                 if (user == null)
                 {
@@ -149,8 +149,48 @@ namespace Business.Controllers
                 // update the password in Admin table
                 user.EmailId = emailIdfromToken;
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
-                user.Password = hashedPassword;                
+                user.Password = hashedPassword;
                 var updateSuccess = _businessContext.Businesses.Update(user);
+                if (updateSuccess == null)
+                {
+                    return BadRequest("Failed to change password.");
+                }
+                await _businessContext.SaveChangesAsync();
+            }
+
+            else
+            {
+                var user = _businessContext.Customers.SingleOrDefault(u => u.Cus_EmailId == emailIdfromToken);
+                if (user == null)
+                {
+                    return BadRequest("User not found.");
+                }
+
+                var HashedUserPassword = BCrypt.Net.BCrypt.HashPassword(request.CurrentPassword);
+                var StoredHashedPassword = user.Cus_Password; // Stored password hash from database
+
+                // Verify if the current password matches the stored password
+                if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, StoredHashedPassword))
+                {
+                    return Unauthorized("Current password mismatch.");
+                }
+
+                if (request.CurrentPassword == request.NewPassword)
+                {
+                    return BadRequest("new password should not be same as current password.");
+                }
+
+                // Validate new password - check with password requirement and should not be same with last
+                if (request.NewPassword.Length < 6)
+                {
+                    return BadRequest("New password does not meet the complexity requirements.");
+                }
+
+                // update the password in Admin table
+                user.Cus_EmailId = emailIdfromToken;
+                string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+                user.Cus_Password = hashedPassword;
+                var updateSuccess = _businessContext.Customers.Update(user);
                 if (updateSuccess == null)
                 {
                     return BadRequest("Failed to change password.");
